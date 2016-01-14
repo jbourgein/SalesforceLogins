@@ -1,0 +1,119 @@
+<html>
+	<head>
+		<title>Logins</title>
+		<style type="text/css">
+			.delButton{
+				margin-left:10px;
+			}
+			.entry{
+				min-width:300px;
+				display:inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<label>URL</label>
+		<input type="text" id="url" style="min-width:500px">
+		<br/>
+		<label>Name</label>
+		<input type="text" id="name" style="min-width:500px">
+		<br/>		
+		<button id="addButton">Add</button>
+			
+		<ul id="recordlist">
+		
+		</ul>
+		<script type="text/javascript">
+			function saveDetails(){
+				var _url = document.getElementById("url").value;
+				var _name = document.getElementById("name").value;
+				var _newRecord = 
+				{
+					id:new Date(),
+					url:_url,
+					name:_name
+				}
+								
+				var _currentRecords = getLoginsFromLocalStorage();				
+				_currentRecords.entries.push(_newRecord);
+				saveLoginsToLocalStorage(_currentRecords);
+				
+				document.getElementById("url").value = "";
+				document.getElementById("name").value = "";
+				
+				buildList();
+			}
+			
+			function getLoginsFromLocalStorage(){
+				var _currentRecordsRaw = localStorage.sfLogins;
+				var _currentRecords = _currentRecordsRaw ? JSON.parse(_currentRecordsRaw) : {};
+				if(!_currentRecords.entries){
+					_currentRecords.entries = [];
+				}
+				return _currentRecords;
+			}
+			
+			function saveLoginsToLocalStorage(logins){
+				localStorage.sfLogins = JSON.stringify(logins);
+			}
+			
+			function deleteRecord(e){
+				e.preventDefault();
+				var id = e.currentTarget.id || "";
+				var logins = getLoginsFromLocalStorage();
+				
+				for(var i = 0;i<logins.entries.length;i++){
+					if(logins.entries[i].id === id){
+						logins.entries.splice(i,1);
+						saveLoginsToLocalStorage(logins);
+						buildList();
+						break;
+					}
+				}
+			}
+			
+			function compare(a,b) {
+			  if (a.name < b.name)
+				return -1;
+			  else if (a.name > b.name)
+				return 1;
+			  else 
+				return 0;
+			}
+			
+			function buildList(){
+				var logins = getLoginsFromLocalStorage();
+				var ulElem = document.getElementById("recordlist");
+							
+				
+				ulElem.innerHTML = "";
+				logins.entries.sort(compare);
+				for(var i = 0;i<logins.entries.length;i++){
+					var curEntry = logins.entries[i];
+																	
+					var newLi = document.createElement("li");
+					var newAnch = document.createElement("a");
+					var deleteButton = document.createElement("button");
+					
+					newAnch.setAttribute("href",curEntry.url);
+					newAnch.setAttribute("target","_blank");
+					newAnch.setAttribute("class","entry");
+					newAnch.text = curEntry.name;
+					
+					deleteButton.setAttribute("id",curEntry.id);
+					deleteButton.setAttribute("class","delButton");
+					deleteButton.innerHTML = "delete";
+									
+					newLi.appendChild(newAnch);
+					newLi.appendChild(deleteButton);					
+					ulElem.appendChild(newLi);
+					deleteButton.addEventListener("click",deleteRecord);
+				}
+			}
+			
+			var btn = document.getElementById("addButton");
+			btn.addEventListener("click",saveDetails);
+			buildList();
+		</script>
+	</body>
+</html>
