@@ -23,7 +23,8 @@
 		<ul id="recordlist">
 		
 		</ul>
-		<script type="text/javascript">
+		<script type="text/javascript">						
+			
 			function saveDetails(){
 				var _url = document.getElementById("url").value;
 				var _name = document.getElementById("name").value;
@@ -59,17 +60,21 @@
 			
 			function deleteRecord(e){
 				e.preventDefault();
-				var id = e.currentTarget.id || "";
-				var logins = getLoginsFromLocalStorage();
-				
-				for(var i = 0;i<logins.entries.length;i++){
-					if(logins.entries[i].id === id){
-						logins.entries.splice(i,1);
-						saveLoginsToLocalStorage(logins);
-						buildList();
-						break;
+				var entryName = e.currentTarget.parentElement.getElementsByClassName("entry")[0].innerText;
+				if(window.confirm("Are you sure you want to delete " + entryName + "?")){
+					var id = e.currentTarget.id || "";
+					var logins = getLoginsFromLocalStorage();
+					
+					for(var i = 0;i<logins.entries.length;i++){
+						if(logins.entries[i].id === id){
+							logins.entries.splice(i,1);
+							saveLoginsToLocalStorage(logins);
+							buildList();
+							break;
+						}
 					}
 				}
+				
 			}
 			
 			function compare(a,b) {
@@ -85,7 +90,6 @@
 				var logins = getLoginsFromLocalStorage();
 				var ulElem = document.getElementById("recordlist");
 							
-				
 				ulElem.innerHTML = "";
 				logins.entries.sort(compare);
 				for(var i = 0;i<logins.entries.length;i++){
