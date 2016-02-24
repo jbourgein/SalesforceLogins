@@ -35,6 +35,10 @@
 				if(_group === ""){
 					_group = "Other";
 				}
+				if(_name === "" || _url === ""){
+					alert("Please enter a name and url");
+					return;
+				}
 				var _newRecord = 
 				{
 					id:new Date(),
