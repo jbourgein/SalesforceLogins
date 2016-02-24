@@ -17,45 +17,82 @@
 		<br/>
 		<label>Name</label>
 		<input type="text" id="name" style="min-width:500px">
-		<br/>		
+		<br/>
+		<label>Group</label>
+		<input type="text" id="group" style="min-width:500px">
+		<br/>
 		<button id="addButton">Add</button>
 			
-		<ul id="recordlist">
+		<div id="recordContainer">
 		
-		</ul>
+		</div>
 		<script type="text/javascript">						
 			
 			function saveDetails(){
 				var _url = document.getElementById("url").value;
 				var _name = document.getElementById("name").value;
+				var _group = document.getElementById("group").value;
+				if(_group === ""){
+					_group = "Other";
+				}
 				var _newRecord = 
 				{
 					id:new Date(),
 					url:_url,
-					name:_name
+					name:_name,
+					groupName:_group
 				}
 								
 				var _currentRecords = getLoginsFromLocalStorage();				
-				_currentRecords.entries.push(_newRecord);
+				//_currentRecords.entries.push(_newRecord);
+				addItemToStorage(_currentRecords,_newRecord);
 				saveLoginsToLocalStorage(_currentRecords);
 				
 				document.getElementById("url").value = "";
 				document.getElementById("name").value = "";
+				document.getElementById("group").value = "";
 				
 				buildList();
 			}
 			
-			function getLoginsFromLocalStorage(){
-				var _currentRecordsRaw = localStorage.sfLogins;
-				var _currentRecords = _currentRecordsRaw ? JSON.parse(_currentRecordsRaw) : {};
-				if(!_currentRecords.entries){
-					_currentRecords.entries = [];
+			function addItemToStorage(currentRecords,item){
+				var isNewGroup = true;
+				currentRecords.forEach(function(elem,ind){
+					if(item.groupName === elem.groupName){
+						delete item.groupName;						
+						elem.logins.push(item);
+						isNewGroup = false;
+					}
+				})
+				
+				if(isNewGroup){
+					var newGroup = 
+					{
+						groupName:item.groupName,
+						logins:
+						[
+							{	id:item.id,
+								url:item.url,
+								name:item.name
+							}
+						]
+					}
+					currentRecords.push(newGroup);
 				}
+			}
+			
+			function getLoginsFromLocalStorage(){
+				var _currentRecordsRaw = localStorage.newSfLogins;
+				var _currentRecords = _currentRecordsRaw ? JSON.parse(_currentRecordsRaw) : [];
+				/*if(!_currentRecords.entries){
+					_currentRecords.entries = [];
+				}*/
 				return _currentRecords;
 			}
 			
 			function saveLoginsToLocalStorage(logins){
-				localStorage.sfLogins = JSON.stringify(logins);
+				logins.sort(sortGroups);
+				localStorage.newSfLogins = JSON.stringify(logins);
 			}
 			
 			function deleteRecord(e){
@@ -63,56 +100,92 @@
 				var entryName = e.currentTarget.parentElement.getElementsByClassName("entry")[0].innerText;
 				if(window.confirm("Are you sure you want to delete " + entryName + "?")){
 					var id = e.currentTarget.id || "";
-					var logins = getLoginsFromLocalStorage();
+					var groups = getLoginsFromLocalStorage();
 					
-					for(var i = 0;i<logins.entries.length;i++){
-						if(logins.entries[i].id === id){
-							logins.entries.splice(i,1);
-							saveLoginsToLocalStorage(logins);
-							buildList();
-							break;
+					for(var i = 0;i<groups.length;i++){
+						var currentGroup = groups[i];
+						for(var j = 0;j < currentGroup.logins.length;j++){
+							var currentLogin = currentGroup.logins[j];
+							if(currentLogin.id === id){
+								currentGroup.logins.splice(j,1);								
+								if(currentGroup.logins.length === 0){
+									groups.splice(i,1);
+								}		
+								saveLoginsToLocalStorage(groups);
+								buildList();								
+								break;
+							}
 						}
+						
 					}
 				}
 				
 			}
 			
 			function compare(a,b) {
-			  if (a.name < b.name)
+				var stringA = a.name.toUpperCase();
+				var stringB = b.name.toUpperCase();
+			  if (stringA < stringB)
 				return -1;
-			  else if (a.name > b.name)
+			  else if (stringA > stringB)
 				return 1;
 			  else 
 				return 0;
 			}
 			
+			function sortGroups(a,b){
+				var stringA = a.groupName.toUpperCase();
+				var stringB = b.groupName.toUpperCase();
+				if (stringA < stringB)
+					return -1;
+				else if (stringA > stringB)
+					return 1;
+				else 
+					return 0;
+			}
+			
+			function makeGroupHeading(elem){
+				return "<h2>" + elem.groupName + "</h2>";
+			}
+			
+			function makeLoginList(elem){
+				elem.logins.sort(compare);
+				var loginListItems = elem.logins
+					.map(makeLoginListItem)
+					.join("");
+				return "<ul>" + loginListItems + "</ul>";				
+			}
+			
+			function makeLoginListItem(elem){
+				return "<li><a id='" + elem.id + "' class='entry' target='_blank' href='" + elem.url + "'>" + elem.name + "</a><button id='" + elem.id + "' class='delButton'>Delete</button></li>";
+			}
+			
+			function makeGroupDom(groupEntry){
+				var div = document.createElement("div");
+				var innerHtmlString = makeGroupHeading(groupEntry) + makeLoginList(groupEntry);
+				
+				div.innerHTML = innerHtmlString;
+				return div;
+			}
+			
+			function bindDeleteListeners(){
+				var deleteButtons = document.getElementsByClassName("delButton");
+				var i;
+				for(i = 0;i < deleteButtons.length; i++){
+					deleteButtons[i].addEventListener("click",deleteRecord);
+				}				
+			}
+			
 			function buildList(){
 				var logins = getLoginsFromLocalStorage();
-				var ulElem = document.getElementById("recordlist");
-							
-				ulElem.innerHTML = "";
-				logins.entries.sort(compare);
-				for(var i = 0;i<logins.entries.length;i++){
-					var curEntry = logins.entries[i];
-																	
-					var newLi = document.createElement("li");
-					var newAnch = document.createElement("a");
-					var deleteButton = document.createElement("button");
-					
-					newAnch.setAttribute("href",curEntry.url);
-					newAnch.setAttribute("target","_blank");
-					newAnch.setAttribute("class","entry");
-					newAnch.text = curEntry.name;
-					
-					deleteButton.setAttribute("id",curEntry.id);
-					deleteButton.setAttribute("class","delButton");
-					deleteButton.innerHTML = "delete";
-									
-					newLi.appendChild(newAnch);
-					newLi.appendChild(deleteButton);					
-					ulElem.appendChild(newLi);
-					deleteButton.addEventListener("click",deleteRecord);
-				}
+				var recordContainer = document.getElementById("recordContainer");
+				recordContainer.innerHTML = "";
+				
+				var groupDivs = logins.map(makeGroupDom);
+				groupDivs.forEach(function(elem,ind){
+					recordContainer.appendChild(elem);
+				});
+				bindDeleteListeners();			
 			}
 			
 			var btn = document.getElementById("addButton");
