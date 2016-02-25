@@ -135,229 +135,236 @@
 		</div>
 		
 		<script type="text/javascript">						
-			var backgrounds = [];
-			function saveDetails(){
-				var _urlInput = document.getElementById("url");
-				var _url = document.getElementById("url").value;
-				var _nameInput = document.getElementById("name");
-				var _name = document.getElementById("name").value;
-				var _group = document.getElementById("group").value;
-				var _isValid = true;
-				if(_group === ""){
-					_group = "Other";
-				}
-				_nameInput.className = "";
-				_urlInput.className = "";	
-				if(_name === ""){
-					_nameInput = document.getElementById("name");
-					_nameInput.className = "red";	
-					_isValid = false;
-				}
-				if(_url === ""){
-					_urlInput = document.getElementById("url");
-					_urlInput.className = "red";	
-					_isValid = false;					
-				}
-				
-				if(!_isValid) return;
-				
-				var _newRecord = 
-				{
-					id:new Date(),
-					url:_url,
-					name:_name,
-					groupName:_group
-				}
-								
-				var _currentRecords = getLoginsFromLocalStorage();				
-				//_currentRecords.entries.push(_newRecord);
-				addItemToStorage(_currentRecords,_newRecord);
-				saveLoginsToLocalStorage(_currentRecords);
-				
-				document.getElementById("url").value = "";
-				document.getElementById("name").value = "";
-				document.getElementById("group").value = "";
-				
-				buildList();
-			}
 			
-			function addItemToStorage(currentRecords,item){
-				var isNewGroup = true;
-				currentRecords.forEach(function(elem,ind){
-					if(item.groupName === elem.groupName){
-						delete item.groupName;						
-						elem.logins.push(item);
-						isNewGroup = false;
+			var LoginsManager = (function(){
+				var _backgrounds = [];
+				function saveDetails(){
+					var _urlInput = document.getElementById("url");
+					var _url = document.getElementById("url").value;
+					var _nameInput = document.getElementById("name");
+					var _name = document.getElementById("name").value;
+					var _group = document.getElementById("group").value;
+					var _isValid = true;
+					if(_group === ""){
+						_group = "Other";
 					}
-				})
-				
-				if(isNewGroup){
-					var newGroup = 
-					{
-						groupName:item.groupName,
-						logins:
-						[
-							{	id:item.id,
-								url:item.url,
-								name:item.name
-							}
-						]
+					_nameInput.className = "";
+					_urlInput.className = "";	
+					if(_name === ""){
+						_nameInput = document.getElementById("name");
+						_nameInput.className = "red";	
+						_isValid = false;
 					}
-					currentRecords.push(newGroup);
-				}
-			}
-			
-			function getLoginsFromLocalStorage(){
-				var _currentRecordsRaw = localStorage.newSfLogins;
-				var _currentRecords = _currentRecordsRaw ? JSON.parse(_currentRecordsRaw) : [];
-				/*if(!_currentRecords.entries){
-					_currentRecords.entries = [];
-				}*/
-				return _currentRecords;
-			}
-			
-			function saveLoginsToLocalStorage(logins){
-				logins.sort(sortGroups);
-				localStorage.newSfLogins = JSON.stringify(logins);
-			}
-			
-			function deleteRecord(e){
-				e.preventDefault();
-				var entryName = e.currentTarget.parentElement.getElementsByClassName("entry")[0].innerText;
-				if(window.confirm("Are you sure you want to delete " + entryName + "?")){
-					var id = e.currentTarget.id || "";
-					var groups = getLoginsFromLocalStorage();
+					if(_url === ""){
+						_urlInput = document.getElementById("url");
+						_urlInput.className = "red";	
+						_isValid = false;					
+					}
 					
-					for(var i = 0;i<groups.length;i++){
-						var currentGroup = groups[i];
-						for(var j = 0;j < currentGroup.logins.length;j++){
-							var currentLogin = currentGroup.logins[j];
-							if(currentLogin.id === id){
-								currentGroup.logins.splice(j,1);								
-								if(currentGroup.logins.length === 0){
-									groups.splice(i,1);
-								}		
-								saveLoginsToLocalStorage(groups);
-								buildList();								
-								break;
-							}
+					if(!_isValid) return;
+					
+					var _newRecord = 
+					{
+						id:new Date(),
+						url:_url,
+						name:_name,
+						groupName:_group
+					}
+									
+					var _currentRecords = getLoginsFromLocalStorage();				
+					addItemToStorage(_currentRecords,_newRecord);
+					saveLoginsToLocalStorage(_currentRecords);
+					
+					document.getElementById("url").value = "";
+					document.getElementById("name").value = "";
+					document.getElementById("group").value = "";
+					
+					buildList();
+				}
+				
+				function addItemToStorage(currentRecords,item){
+					var isNewGroup = true;
+					currentRecords.forEach(function(elem,ind){
+						if(item.groupName === elem.groupName){
+							delete item.groupName;						
+							elem.logins.push(item);
+							isNewGroup = false;
 						}
-						
+					})
+					
+					if(isNewGroup){
+						var newGroup = 
+						{
+							groupName:item.groupName,
+							logins:
+							[
+								{	id:item.id,
+									url:item.url,
+									name:item.name
+								}
+							]
+						}
+						currentRecords.push(newGroup);
 					}
 				}
 				
-			}
-			
-			function compare(a,b) {
-				var stringA = a.name.toUpperCase();
-				var stringB = b.name.toUpperCase();
-			  if (stringA < stringB)
-				return -1;
-			  else if (stringA > stringB)
-				return 1;
-			  else 
-				return 0;
-			}
-			
-			function sortGroups(a,b){
-				var stringA = a.groupName.toUpperCase();
-				var stringB = b.groupName.toUpperCase();
-				if (stringA < stringB)
+				function getLoginsFromLocalStorage(){
+					var _currentRecordsRaw = localStorage.newSfLogins;
+					var _currentRecords = _currentRecordsRaw ? JSON.parse(_currentRecordsRaw) : [];
+					/*if(!_currentRecords.entries){
+						_currentRecords.entries = [];
+					}*/
+					return _currentRecords;
+				}
+				
+				function saveLoginsToLocalStorage(logins){
+					logins.sort(sortGroups);
+					localStorage.newSfLogins = JSON.stringify(logins);
+				}
+				
+				function deleteRecord(e){
+					e.preventDefault();
+					var entryName = e.currentTarget.parentElement.getElementsByClassName("entry")[0].innerText;
+					if(window.confirm("Are you sure you want to delete " + entryName + "?")){
+						var id = e.currentTarget.id || "";
+						var groups = getLoginsFromLocalStorage();
+						
+						for(var i = 0;i<groups.length;i++){
+							var currentGroup = groups[i];
+							for(var j = 0;j < currentGroup.logins.length;j++){
+								var currentLogin = currentGroup.logins[j];
+								if(currentLogin.id === id){
+									currentGroup.logins.splice(j,1);								
+									if(currentGroup.logins.length === 0){
+										groups.splice(i,1);
+									}		
+									saveLoginsToLocalStorage(groups);
+									buildList();								
+									break;
+								}
+							}
+							
+						}
+					}
+					
+				}
+				
+				function compare(a,b) {
+					var stringA = a.name.toUpperCase();
+					var stringB = b.name.toUpperCase();
+				  if (stringA < stringB)
 					return -1;
-				else if (stringA > stringB)
+				  else if (stringA > stringB)
 					return 1;
-				else 
+				  else 
 					return 0;
-			}
-			
-			function makeGroupHeading(elem){
-				return "<h2>" + elem.groupName + "</h2>";
-			}
-			
-			function makeLoginList(elem){
-				elem.logins.sort(compare);
-				var loginListItems = elem.logins
-					.map(makeLoginListItem)
-					.join("");
-				return "<ul>" + loginListItems + "</ul>";				
-			}
-			
-			function makeLoginListItem(elem){
-				return "<li><a id='" + elem.id + "' class='entry' target='_blank' href='" + elem.url + "'>" + elem.name + "</a><button id='" + elem.id + "' class='delButton'></button></li>";
-			}
-			
-			function makeGroupDom(groupEntry){
-				var div = document.createElement("div");
-				var innerHtmlString = makeGroupHeading(groupEntry) + makeLoginList(groupEntry);
+				}
 				
-				div.innerHTML = innerHtmlString;
-				return div;
-			}
-			
-			function bindDeleteListeners(){
-				var deleteButtons = document.getElementsByClassName("delButton");
-				var i;
-				for(i = 0;i < deleteButtons.length; i++){
-					deleteButtons[i].addEventListener("click",deleteRecord);
-				}				
-			}
-			
-			function bindHeaderListeners(){
-				var headers = document.getElementsByTagName("h2");
-				var i;
-				for(i=0;i<headers.length;i++){
-					headers[i].addEventListener("click",hideChildList);
+				function sortGroups(a,b){
+					var stringA = a.groupName.toUpperCase();
+					var stringB = b.groupName.toUpperCase();
+					if (stringA < stringB)
+						return -1;
+					else if (stringA > stringB)
+						return 1;
+					else 
+						return 0;
 				}
-			}
-			
-			function hideChildList(event){
-				var childList = event.currentTarget.parentElement.getElementsByTagName('ul')[0];
-				var childListClass = childList.className;
-				if(childListClass === "hidden"){
-					childList.className = "visible";
-				}
-				else{
-					childList.className = "hidden";
-				}
-			}
-			
-			function buildList(){
-				var logins = getLoginsFromLocalStorage();
-				var recordContainer = document.getElementById("recordContainer");
-				recordContainer.innerHTML = "";
 				
-				var groupDivs = logins.map(makeGroupDom);
-				groupDivs.forEach(function(elem,ind){
-					recordContainer.appendChild(elem);
-				});
-				bindDeleteListeners();
-				bindHeaderListeners();
-			}
-			
-			function changeColor(){
-				var randomNumber = Math.floor(Math.random() * (backgrounds.length - 0) + 0);
-				var randomPattern = backgrounds[randomNumber];
-				var topbar = document.getElementById("topbar");
-				topbar.style.opacity = 0;
-				topbar.style.background = "url('" + randomPattern.imageUrl + "')";
-				topbar.style.opacity = 1;
-			}
-			
-			function colourCallback(res){
-				backgrounds = res;
-				changeColor();
-				setInterval(changeColor,10000);
-			}
-			
-			var btn = document.getElementById("addButton");
-			btn.addEventListener("click",saveDetails);
-			buildList();
-			
-			
-			
+				function makeGroupHeading(elem){
+					return "<h2>" + elem.groupName + "</h2>";
+				}
+				
+				function makeLoginList(elem){
+					elem.logins.sort(compare);
+					var loginListItems = elem.logins
+						.map(makeLoginListItem)
+						.join("");
+					return "<ul>" + loginListItems + "</ul>";				
+				}
+				
+				function makeLoginListItem(elem){
+					return "<li><a id='" + elem.id + "' class='entry' target='_blank' href='" + elem.url + "'>" + elem.name + "</a><button id='" + elem.id + "' class='delButton'></button></li>";
+				}
+				
+				function makeGroupDom(groupEntry){
+					var div = document.createElement("div");
+					var innerHtmlString = makeGroupHeading(groupEntry) + makeLoginList(groupEntry);
+					
+					div.innerHTML = innerHtmlString;
+					return div;
+				}
+				
+				function bindDeleteListeners(){
+					var deleteButtons = document.getElementsByClassName("delButton");
+					var i;
+					for(i = 0;i < deleteButtons.length; i++){
+						deleteButtons[i].addEventListener("click",deleteRecord);
+					}				
+				}
+				
+				function bindHeaderListeners(){
+					var headers = document.getElementsByTagName("h2");
+					var i;
+					for(i=0;i<headers.length;i++){
+						headers[i].addEventListener("click",hideChildList);
+					}
+				}
+				
+				function hideChildList(event){
+					var childList = event.currentTarget.parentElement.getElementsByTagName('ul')[0];
+					var childListClass = childList.className;
+					if(childListClass === "hidden"){
+						childList.className = "visible";
+					}
+					else{
+						childList.className = "hidden";
+					}
+				}
+				
+				function buildList(){
+					var logins = getLoginsFromLocalStorage();
+					var recordContainer = document.getElementById("recordContainer");
+					recordContainer.innerHTML = "";
+					
+					var groupDivs = logins.map(makeGroupDom);
+					groupDivs.forEach(function(elem,ind){
+						recordContainer.appendChild(elem);
+					});
+					bindDeleteListeners();
+					bindHeaderListeners();
+				}
+				
+				function changeColor(){
+					var randomNumber = Math.floor(Math.random() * (_backgrounds.length - 0) + 0);
+					var randomPattern = _backgrounds[randomNumber];
+					var topbar = document.getElementById("topbar");
+					topbar.style.opacity = 0;
+					topbar.style.background = "url('" + randomPattern.imageUrl + "')";
+					topbar.style.opacity = 1;
+				}
+				
+				function _colourCallback(res){
+					_backgrounds = res;
+					changeColor();
+					setInterval(changeColor,10000);
+				}
+				function _init(){
+					var btn = document.getElementById("addButton");
+					btn.addEventListener("click",saveDetails);
+					buildList();
+				}
+				
+				return{
+					init:_init,
+					colourCallback:_colourCallback					
+				}
+			})();
+
+			LoginsManager.init();
 		</script>
 		
 		<!--needed for CORS support -->
-		<script src="http://www.colourlovers.com/api/patterns/top?jsonCallback=colourCallback"></script>
+		<script id="foo" src="http://www.colourlovers.com/api/patterns/top?jsonCallback=LoginsManager.colourCallback"></script>
 	</body>
 </html>
