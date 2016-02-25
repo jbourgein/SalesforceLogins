@@ -10,6 +10,7 @@
 				background:white;
 				margin-bottom:0;
 				padding-left:5px;
+				color: #666666;
 			}
 			
 			#container{
@@ -51,9 +52,9 @@
 			}
 			li{
 				list-style:none;				
-				background-color:#ECEBEB;
-				margin-bottom:5px;
+				background-color:#ECEBEB;				
 				padding:1em;
+				border-top: 1px solid #fefefe;
 			}
 			li:hover{
 				background-color:#ECEBFF;
@@ -93,10 +94,23 @@
 			#recordContainer{
 				clear:both;
 			}
-			
+			#topBar{
+				width:100%;
+				height:200px;
+				position:absolute;
+				z-index:-1;
+				top:0;
+				left:0;
+				background-color:black;
+				opacity:1;
+				transition:all 1s ease-in-out;
+			}
 		</style>
 	</head>
 	<body>
+		<div id="topbar">
+		
+		</div>
 		<div id="container">
 			<div id="newItemContainer">
 				<div class="inputWrap">					
@@ -121,7 +135,7 @@
 		</div>
 		
 		<script type="text/javascript">						
-			
+			var backgrounds = [];
 			function saveDetails(){
 				var _urlInput = document.getElementById("url");
 				var _url = document.getElementById("url").value;
@@ -320,15 +334,27 @@
 				bindHeaderListeners();
 			}
 			
+			function changeColor(){
+				var randomNumber = Math.floor(Math.random() * (backgrounds.length - 0) + 0);
+				var randomPattern = backgrounds[randomNumber];
+				var topbar = document.getElementById("topbar");
+				topbar.style.opacity = 0;
+				topbar.style.background = "url('" + randomPattern.imageUrl + "')";
+				topbar.style.opacity = 1;
+			}
+			
+			function colourCallback(res){
+				backgrounds = res;
+				changeColor();
+				setInterval(changeColor,10000);
+			}
+			
 			var btn = document.getElementById("addButton");
 			btn.addEventListener("click",saveDetails);
 			buildList();
 			
-			function colourCallback(res){
-				var randomNumber = Math.floor(Math.random() * (res.length - 0) + 0);
-				var randomPattern = res[randomNumber];
-				document.getElementsByTagName("body")[0].style.background = "url('" + randomPattern.imageUrl + "')";
-			}
+			
+			
 		</script>
 		
 		<!--needed for CORS support -->
