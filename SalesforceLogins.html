@@ -6,12 +6,18 @@
 				font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 				overflow:scroll; /* need this so showing of scroll bars on show/hide doesn't moe elements */
 			}
+			h2{
+				background:white;
+				margin-bottom:0;
+				padding-left:5px;
+			}
 			
 			#container{
 				width:960px;
 				margin:0 auto 75px;
 			}
 			ul{
+				margin-top:0;
 				padding:0;
 				transition: all 0.25s ease-in-out;
 			}
@@ -30,14 +36,15 @@
 			#addButton{
 				float:right;
 				background:url('img/round_plus.png') no-repeat right;
-				background-size:2em 2em;
+				background-size:4em 4em;
 				border:none;
-				height:2em;
-				width:2em;
+				height:4em;
+				width:4em;
+				background-color:white;
+				margin-bottom:20px;
 			}
 			#addButton:hover{
-				border:1px solid #ECEBEB;
-				padding:2px;
+				background-color:#ECEBFF;
 			}
 			.red{
 				border:1px solid red;
@@ -82,6 +89,11 @@
 				min-width:75%;
 				display:inline-block;
 			}
+			
+			#recordContainer{
+				clear:both;
+			}
+			
 		</style>
 	</head>
 	<body>
@@ -311,6 +323,15 @@
 			var btn = document.getElementById("addButton");
 			btn.addEventListener("click",saveDetails);
 			buildList();
+			
+			function colourCallback(res){
+				var randomNumber = Math.floor(Math.random() * (res.length - 0) + 0);
+				var randomPattern = res[randomNumber];
+				document.getElementsByTagName("body")[0].style.background = "url('" + randomPattern.imageUrl + "')";
+			}
 		</script>
+		
+		<!--needed for CORS support -->
+		<script src="http://www.colourlovers.com/api/patterns/top?jsonCallback=colourCallback"></script>
 	</body>
 </html>
