@@ -4,6 +4,7 @@
 		<style type="text/css">
 			body{
 				font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+				overflow:scroll; /* need this so showing of scroll bars on show/hide doesn't moe elements */
 			}
 			
 			#container{
@@ -12,6 +13,18 @@
 			}
 			ul{
 				padding:0;
+				transition: all 0.25s ease-in-out;
+			}
+			
+			ul.hidden{
+			    opacity: 0;
+				height: 0;
+				overflow: hidden;
+			}
+			
+			ul.visible{
+				opacity: 1;
+				height: auto;
 			}
 			
 			#addButton{
@@ -263,6 +276,25 @@
 				}				
 			}
 			
+			function bindHeaderListeners(){
+				var headers = document.getElementsByTagName("h2");
+				var i;
+				for(i=0;i<headers.length;i++){
+					headers[i].addEventListener("click",hideChildList);
+				}
+			}
+			
+			function hideChildList(event){
+				var childList = event.currentTarget.parentElement.getElementsByTagName('ul')[0];
+				var childListClass = childList.className;
+				if(childListClass === "hidden"){
+					childList.className = "visible";
+				}
+				else{
+					childList.className = "hidden";
+				}
+			}
+			
 			function buildList(){
 				var logins = getLoginsFromLocalStorage();
 				var recordContainer = document.getElementById("recordContainer");
@@ -272,7 +304,8 @@
 				groupDivs.forEach(function(elem,ind){
 					recordContainer.appendChild(elem);
 				});
-				bindDeleteListeners();			
+				bindDeleteListeners();
+				bindHeaderListeners();
 			}
 			
 			var btn = document.getElementById("addButton");
