@@ -96,14 +96,18 @@
 			}
 			#topBar{
 				width:100%;
-				height:200px;
+				height:190px;
 				position:absolute;
 				z-index:-1;
-				top:0;
+				top:0;;
 				left:0;
 				background-color:black;
 				opacity:1;
-				transition:all 1s ease-in-out;
+				transition:all 2s ease-in-out;
+			}
+			#man{
+				display:none;
+				margin:0 auto;
 			}
 		</style>
 	</head>
@@ -112,7 +116,9 @@
 		
 		</div>
 		<div id="container">
+			
 			<div id="newItemContainer">
+				
 				<div class="inputWrap">					
 					<input type="text" id="url" placeholder="url*">
 				</div>
@@ -130,9 +136,11 @@
 			
 				
 			<div id="recordContainer">
-			
+					
 			</div>
 		</div>
+		
+			
 		
 		<script type="text/javascript">						
 			
@@ -303,12 +311,22 @@
 					}				
 				}
 				
+				function clickHeader(header){
+					setTimeout(function(){
+						header.click();
+					},1000);
+				}
+				
 				function bindHeaderListeners(){
-					var headers = document.getElementsByTagName("h2");
+					var headers = document.getElementsByTagName("h2");									
+										
 					var i;
 					for(i=0;i<headers.length;i++){
-						headers[i].addEventListener("click",hideChildList);
+						var header = headers[i];						
+						header.addEventListener("click",hideChildList);						
+						clickHeader(header);
 					}
+					
 				}
 				
 				function hideChildList(event){
@@ -325,12 +343,13 @@
 				function buildList(){
 					var logins = getLoginsFromLocalStorage();
 					var recordContainer = document.getElementById("recordContainer");
-					recordContainer.innerHTML = "";
+					recordContainer.innerHTML = '<img src="img/300.gif" id="man">';
 					
 					var groupDivs = logins.map(makeGroupDom);
 					groupDivs.forEach(function(elem,ind){
 						recordContainer.appendChild(elem);
-					});
+					});					
+					
 					bindDeleteListeners();
 					bindHeaderListeners();
 				}
@@ -339,6 +358,7 @@
 					var randomNumber = Math.floor(Math.random() * (_backgrounds.length - 0) + 0);
 					var randomPattern = _backgrounds[randomNumber];
 					var topbar = document.getElementById("topbar");
+					
 					topbar.style.opacity = 0;
 					topbar.style.background = "url('" + randomPattern.imageUrl + "')";
 					topbar.style.opacity = 1;
@@ -349,10 +369,24 @@
 					changeColor();
 					setInterval(changeColor,10000);
 				}
+				
+				function _showMan(){
+					var timer;
+					var man = document.getElementById("man");
+					document.addEventListener('mousemove', function() {
+						clearTimeout(timer);
+						man.style.display = "none";
+						timer = setTimeout(function() {
+							man.style.display = "block";
+						}, 30000);
+					});
+				}
+				
 				function _init(){
 					var btn = document.getElementById("addButton");
 					btn.addEventListener("click",saveDetails);
 					buildList();
+					_showMan();
 				}
 				
 				return{
