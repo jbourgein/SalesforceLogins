@@ -373,13 +373,18 @@
 				function _showMan(){
 					var timer;
 					var man = document.getElementById("man");
-					document.addEventListener('mousemove', function() {
+					
+					var startTimerAgain = function(){
 						clearTimeout(timer);
 						man.style.display = "none";
 						timer = setTimeout(function() {
 							man.style.display = "block";
 						}, 30000);
-					});
+					}
+					
+					document.addEventListener('mousemove', startTimerAgain);
+					window.onblur = startTimerAgain;
+					
 				}
 				
 				function _init(){
